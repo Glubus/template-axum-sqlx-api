@@ -1,3 +1,15 @@
+//! # Template Axum SQLx API
+//! 
+//! Ce module est le point d'entrée principal de l'application.
+//! Il configure et démarre le serveur HTTP avec Axum.
+//! 
+//! ## Fonctionnalités
+//! - Configuration du serveur
+//! - Initialisation de la base de données
+//! - Configuration du logging
+//! - Configuration CORS
+//! - Gestion des erreurs
+
 mod db;
 mod models;
 mod routes;
@@ -12,6 +24,15 @@ use crate::db::DatabaseManager;
 use crate::routes::create_router;
 use crate::config::Config;
 
+/// Point d'entrée principal de l'application.
+/// 
+/// Cette fonction :
+/// 1. Initialise le logging
+/// 2. Charge les variables d'environnement
+/// 3. Configure le serveur
+/// 4. Initialise la base de données
+/// 5. Configure les routes et les middlewares
+/// 6. Démarre le serveur HTTP
 #[tokio::main]
 async fn main() {
     // Initialize tracing
