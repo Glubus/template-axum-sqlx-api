@@ -41,7 +41,7 @@ RUST_LOG=info
 
 3. Créez la base de données :
 ```bash
-createdb template_db
+sqlx database create
 ```
 
 4. Exécutez les migrations (à implémenter) :

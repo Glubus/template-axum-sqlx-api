@@ -1,8 +1,8 @@
 //! # Template Axum SQLx API
-//! 
+//!
 //! Ce module est le point d'entrée principal de l'application.
 //! Il configure et démarre le serveur HTTP avec Axum.
-//! 
+//!
 //! ## Fonctionnalités
 //! - Configuration du serveur
 //! - Initialisation de la base de données
@@ -10,82 +10,61 @@
 //! - Configuration CORS
 //! - Gestion des erreurs
 
+mod config;
 mod db;
+mod handlers;
 mod models;
 mod routes;
-mod handlers;
-mod config;
 
+use axum::Router;
 use std::net::SocketAddr;
-use dotenvy::dotenv;
-use tower_http::cors::{CorsLayer, Any};
-use tower_http::trace::TraceLayer;
-use crate::db::DatabaseManager;
-use crate::routes::create_router;
-use crate::config::Config;
+use tower_http::cors::CorsLayer;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Point d'entrée principal de l'application.
-/// 
+///
 /// Cette fonction :
 /// 1. Initialise le logging
-/// 2. Charge les variables d'environnement
-/// 3. Configure le serveur
-/// 4. Initialise la base de données
-/// 5. Configure les routes et les middlewares
-/// 6. Démarre le serveur HTTP
+/// 2. Initialise la base de données
+/// 3. Configure les routes et les middlewares
+/// 4. Démarre le serveur HTTP
 #[tokio::main]
 async fn main() {
+    // Load environment variables
+    dotenvy::dotenv().ok();
+
+    // Initialize configuration
+    let config = config::Config::from_env().expect("Failed to load configuration");
+
     // Initialize tracing
-    tracing_subscriber::fmt()
-        .with_target(false)
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::filter::EnvFilter::new(
+            &config.log_level,
+        ))
+        .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Load environment variables
-    if dotenvy::dotenv().is_err() {
-        tracing::info!(".env file not found or failed to load, using default configurations or direct env vars.");
-    }
-
-    // Load configuration
-    let config = match Config::from_env() {
-        Ok(cfg) => cfg,
-        Err(_e) => {
-            tracing::warn!("Failed to load HOST/PORT from env, using default: 127.0.0.1:3001");
-            Config { server_address: "127.0.0.1:3001".to_string() } 
-        }
-    };
-
     // Initialize database
-    let mut db = DatabaseManager::new();
-    if let Err(e) = db.connect().await {
-        eprintln!("Failed to connect to database: {}", e);
-        return;
-    }
+    let mut db = db::DatabaseManager::new();
+    db.connect(&config)
+        .await
+        .expect("Failed to connect to database");
 
-    // Create router
-    let app = create_router(db);
+    // Build our application with a route
+    let app = Router::new()
+        .merge(routes::create_router(db))
+        .layer(CorsLayer::permissive());
 
-    // Configure CORS and Tracing
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
-
-    let app = app
-        .layer(cors)
-        .layer(TraceLayer::new_for_http());
-
-    // Run server
-    let addr_str = config.server_address.clone();
-    let addr: SocketAddr = match addr_str.parse() {
-        Ok(s_addr) => s_addr,
-        Err(e) => {
-            eprintln!("Invalid server address format '{}': {}. Falling back to 127.0.0.1:3001", addr_str, e);
-            "127.0.0.1:3001".parse().expect("Fallback address should be valid")
-        }
-    };
-
-    tracing::info!("🚀 Server running on http://{}", addr);
-    
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    // Run it
+    let addr: SocketAddr = config
+        .server_address
+        .parse()
+        .expect("Invalid server address");
+    tracing::info!("listening on {}", addr);
+    axum::serve(
+        tokio::net::TcpListener::bind(addr).await.unwrap(),
+        app.into_make_service(),
+    )
+    .await
+    .unwrap();
 }
