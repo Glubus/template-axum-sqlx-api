@@ -1,170 +1,117 @@
 # Template Axum SQLx API
 
-Un template moderne pour créer des APIs REST avec Rust, Axum et SQLx.
+Un template pour construire des APIs REST avec Axum et SQLx.
 
-## 🚀 Fonctionnalités
+## Fonctionnalités
 
-- Framework web Axum
-- Base de données PostgreSQL avec SQLx
-- Structure modulaire (models, handlers, routes)
-- Gestion des erreurs avec thiserror
-- Logging avec tracing
-- Configuration via variables d'environnement
-- Documentation API (Swagger/OpenAPI) - optionnel
-- Docker Compose pour PostgreSQL et pgAdmin
+- 🚀 Framework web Axum
+- 🗄️ Base de données PostgreSQL avec SQLx
+- 🔒 Validation des données
+- 📝 Logging structuré
+- 🔄 Gestion des erreurs
+- 🌐 CORS configurable
+- 📦 Configuration via variables d'environnement
 
-## 📋 Prérequis
+## Prérequis
 
 - Rust (dernière version stable)
-- Docker et Docker Compose
-- PostgreSQL (si vous n'utilisez pas Docker)
-- Un compte GitHub
+- PostgreSQL
+- Docker (optionnel)
 
-## 🛠 Installation
+## Installation
 
-1. Fork ce repository sur GitHub :
-   - Cliquez sur le bouton "Fork" en haut à droite de cette page
-   - Cela créera une copie du projet dans votre compte GitHub
-
-2. Clonez votre fork :
+1. Clonez le repository :
 ```bash
-git clone https://github.com/VOTRE-USERNAME/template-axum-sqlx-api.git
+git clone http://localhost:3000/osef/template-axum-sqlx-api.git
 cd template-axum-sqlx-api
 ```
 
-3. Configurez les variables d'environnement :
-   - Copiez le fichier `.env.template` en `.env` et éditer le fichier en question pour correspondre a la config postgres ou docker :
-   ```bash
-   cp .env.template .env
-   ```
-   - Ou créez manuellement un fichier `.env` à la racine du projet avec le contenu suivant :
-   ```env
-   DATABASE_URL=postgres://postgres:postgres@localhost:5432/template_db
-   HOST=127.0.0.1
-   PORT=3001
-   ```
+2. Créez un fichier `.env` à la racine du projet :
+```env
+# Configuration du serveur
+HOST=127.0.0.1
+PORT=3000
 
-4. Démarrez la base de données PostgreSQL avec Docker :
-```bash
-docker compose -f assets/compose.yml up -d
+# Configuration de la base de données
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/template_db
+
+# Niveau de logging
+RUST_LOG=info
 ```
 
-## 🏃‍♂️ Démarrage
+3. Créez la base de données :
+```bash
+createdb template_db
+```
 
-1. Compilez et lancez le serveur :
+4. Exécutez les migrations (à implémenter) :
+```bash
+sqlx migrate run
+```
+
+## Démarrage
+
 ```bash
 cargo run
 ```
 
-Le serveur sera accessible sur `http://localhost:3001`
+Le serveur sera accessible à l'adresse `http://localhost:3000`.
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
-src/
-├── models/          # Modèles de données
-│   ├── mod.rs      # Module principal des modèles
-│   └── common.rs   # Structures communes
-├── handlers/        # Gestionnaires de routes
-│   ├── mod.rs      # Module principal des handlers
-│   └── common.rs   # Utilitaires communs
-├── routes/         # Définition des routes
-│   └── mod.rs      # Configuration du routeur
-├── db.rs           # Gestion de la base de données
-├── config.rs       # Configuration de l'application
-└── main.rs         # Point d'entrée
+.
+├── src/
+│   ├── config.rs     # Configuration de l'application
+│   ├── db.rs         # Gestion de la base de données
+│   ├── handlers/     # Gestionnaires de routes
+│   ├── models/       # Modèles de données
+│   ├── routes/       # Définition des routes
+│   └── main.rs       # Point d'entrée
+├── .env             # Variables d'environnement
+├── .gitignore
+├── Cargo.toml
+└── README.md
 ```
 
-## 🛠 Développement
+## Configuration
 
-### Ajouter un nouveau module
+La configuration se fait via des variables d'environnement dans le fichier `.env` :
 
-1. Créez les fichiers nécessaires :
+- `HOST` : Adresse du serveur (défaut: 127.0.0.1)
+- `PORT` : Port du serveur (défaut: 3000)
+- `DATABASE_URL` : URL de connexion à la base de données
+- `RUST_LOG` : Niveau de logging (défaut: info)
+
+## Développement
+
+### Tests
+
 ```bash
-touch src/models/votre_module.rs
-touch src/handlers/votre_module.rs
-touch src/routes/votre_module.rs
+cargo test
 ```
 
-2. Exportez les modules dans leurs respectifs `mod.rs`
+### Linting
 
-3. Ajoutez les routes dans `routes/mod.rs`
-
-### Base de données
-
-- Accédez à pgAdmin : http://localhost:5050
-  - Email : admin@admin.com
-  - Mot de passe : admin
-
-- Pour arrêter la base de données :
 ```bash
-docker compose -f assets/compose.yml down
+cargo clippy
 ```
 
-## 🔧 Configuration
+### Formatage
 
-### Variables d'environnement
-
-Le fichier `.env.template` contient toutes les variables d'environnement disponibles :
-
-```env
-# Database Configuration
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/template_db
-
-# Server Configuration
-HOST=127.0.0.1
-PORT=3001
-
-# Logging Configuration
-RUST_LOG=info
-
-# Security (Optional)
-# JWT_SECRET=your-secret-key
-# JWT_EXPIRATION=3600
-
-# CORS (Optional)
-# CORS_ORIGIN=http://localhost:3000
-
-# Rate Limiting (Optional)
-# RATE_LIMIT_REQUESTS=100
-# RATE_LIMIT_DURATION=60
-```
-
-Pour configurer votre environnement :
-1. Copiez le fichier `.env.template` en `.env` :
 ```bash
-cp .env.template .env
+cargo fmt
 ```
-2. Modifiez les valeurs selon vos besoins
-3. Les variables marquées comme "Optional" peuvent être décommentées si nécessaire
 
-### Docker Compose
+## Docker
 
-Le fichier `assets/compose.yml` configure :
-- PostgreSQL 16
-- pgAdmin 4
-- Volumes persistants
-- Healthchecks
+Pour construire et exécuter avec Docker :
 
-## 📚 Documentation
+```bash
+docker build -t template-axum-sqlx-api .
+docker run -p 3000:3000 template-axum-sqlx-api
+```
 
-- [Axum Documentation](https://docs.rs/axum)
-- [SQLx Documentation](https://docs.rs/sqlx)
-- [Rust Documentation](https://doc.rust-lang.org/book/)
+## Licence
 
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à :
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push sur la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
-## 📝 License
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## 👥 Auteurs
-
-- Votre Nom - *Travail initial* - [Votre GitHub](https://github.com/votre-username) 
+MIT 
