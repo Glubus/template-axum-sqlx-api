@@ -1,11 +1,11 @@
 [package]
 name = "template-axum-sqlx-api"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["Osef <osefcode@gmail.com>"]
 description = "A template for building REST APIs with Axum and SQLx"
 license = "MIT"
-repository = "localhost:3000/"
+repository = "http://localhost:3000/osef/template-axum-sqlx-api.git"
 readme = "README.md"
 keywords = ["api", "axum", "sqlx", "postgres", "rest"]
 categories = ["web-programming::http-server", "database"]
@@ -30,7 +30,7 @@ thiserror = "2.0"
 
 # Logging
 tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 
 # Utilities
 chrono = { version = "0.4.34", features = ["serde"] }
@@ -51,6 +51,10 @@ config = "0.14"
 # OpenAPI / Swagger
 # utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
 # utoipa-swagger-ui = { version = "9.0.1", features = ["axum"] }
+
+# Additional dependencies
+async-trait = "0.1"
+futures = "0.3"
 
 [dev-dependencies]
 tokio-test = "0.4"
