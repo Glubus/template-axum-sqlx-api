@@ -16,9 +16,7 @@ use crate::db::DatabaseManager;
 use axum::Router;
 
 // Re-export all route modules here
-// Example:
-// pub mod user;
-// pub mod product;
+pub mod help;
 
 /// Crée le routeur principal de l'application.
 ///
@@ -36,7 +34,8 @@ use axum::Router;
 /// * `Router` - Le routeur configuré
 pub fn create_router(db: DatabaseManager) -> Router {
     Router::new()
-        // Add your route modules here
+        .merge(help::router())
+        // Add your other route modules here
         // Example:
         // .merge(user::router())
         // .merge(product::router())
