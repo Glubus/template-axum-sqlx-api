@@ -4,7 +4,7 @@
 //! Il configure et démarre le serveur HTTP avec Axum.
 //!
 //! ## Fonctionnalités
-//! - Configuration du serveur
+//! - Configuration depuis config.toml
 //! - Initialisation de la base de données
 //! - Configuration du logging
 //! - Configuration CORS
@@ -24,25 +24,26 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 /// Point d'entrée principal de l'application.
 ///
 /// Cette fonction :
-/// 1. Initialise le logging
-/// 2. Initialise la base de données
-/// 3. Configure les routes et les middlewares
-/// 4. Démarre le serveur HTTP
+/// 1. Charge la configuration depuis config.toml
+/// 2. Initialise le logging
+/// 3. Initialise la base de données
+/// 4. Configure les routes et les middlewares
+/// 5. Démarre le serveur HTTP
 #[tokio::main]
 async fn main() {
-    // Load environment variables
-    dotenvy::dotenv().ok();
-
-    // Initialize configuration
-    let config = config::Config::from_env().expect("Failed to load configuration");
+    // Load configuration from config.toml
+    let config = config::Config::load().expect("Failed to load configuration");
 
     // Initialize tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::filter::EnvFilter::new(
-            &config.log_level,
+            &config.logging.level,
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    tracing::info!("Starting server with configuration loaded from config.toml");
+    tracing::debug!("Server will bind to: {}", config.server_address());
 
     // Initialize database
     let mut db = db::DatabaseManager::new();
@@ -57,7 +58,7 @@ async fn main() {
 
     // Run it
     let addr: SocketAddr = config
-        .server_address
+        .server_address()
         .parse()
         .expect("Invalid server address");
     tracing::info!("listening on {}", addr);

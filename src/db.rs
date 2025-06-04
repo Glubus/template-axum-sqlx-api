@@ -52,11 +52,13 @@ impl DatabaseManager {
     /// * `Result<(), sqlx::Error>` - Succès ou erreur de connexion
     pub async fn connect(&mut self, config: &Config) -> Result<(), sqlx::Error> {
         let pool = PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&config.database_url)
+            .max_connections(config.database.max_connections)
+            .min_connections(config.database.min_connections)
+            .connect(&config.database.url)
             .await?;
 
         self.pool = Some(pool);
+        tracing::info!("Connected to database with {} max connections", config.database.max_connections);
         Ok(())
     }
 
