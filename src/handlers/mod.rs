@@ -4,3 +4,4 @@
 // pub mod product;
 
 pub mod common;
+pub mod help;
