@@ -4,8 +4,8 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Serialize, Deserialize)]
+use utoipa::ToSchema;
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct HealthResponse {
     pub status: String,
     pub timestamp: DateTime<Utc>,
@@ -15,14 +15,14 @@ pub struct HealthResponse {
     pub performance: PerformanceMetrics,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct DatabaseStatus {
     pub connected: bool,
     pub response_time_ms: Option<u64>,
     pub error: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct SystemMetrics {
     pub cpu_usage: f32,
     pub cpu_count: usize,
@@ -33,12 +33,12 @@ pub struct SystemMetrics {
     pub uptime: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PerformanceMetrics {
     pub response_time_ms: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct InfoResponse {
     pub name: String,
     pub version: String,
@@ -47,7 +47,7 @@ pub struct InfoResponse {
     pub endpoints: Vec<EndpointInfo>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct EndpointInfo {
     pub path: String,
     pub method: String,

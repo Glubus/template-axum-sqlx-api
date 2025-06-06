@@ -12,6 +12,8 @@ use axum::{
 use chrono::Utc;
 use sysinfo::{Disks, System};
 use std::time::Instant;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     db::DatabaseManager,
@@ -21,7 +23,17 @@ use crate::{
     },
 };
 
-/// Handler pour la santé générale du système
+#[utoipa::path(
+    get,
+    path = "/api/help/health",
+    tag = "System",
+    responses(
+        (status = 200, description = "System is healthy", body = HealthResponse),
+        (status = 503, description = "System is unhealthy")
+    ),
+    summary = "Get system health status",
+    description = "Performs a comprehensive health check of the system including database connection, system metrics, and performance metrics."
+)]
 pub async fn health_check(State(db): State<DatabaseManager>) -> Result<Json<HealthResponse>, StatusCode> {
     let start_time = Instant::now();
     
@@ -53,44 +65,17 @@ pub async fn health_check(State(db): State<DatabaseManager>) -> Result<Json<Heal
     }
 }
 
-/// Handler pour les informations sur l'API
-pub async fn info() -> Json<InfoResponse> {
-    Json(InfoResponse {
-        name: env!("CARGO_PKG_NAME").to_string(),
-        version: env!("CARGO_PKG_VERSION").to_string(),
-        description: env!("CARGO_PKG_DESCRIPTION").to_string(),
-        authors: env!("CARGO_PKG_AUTHORS").split(':').map(|s| s.trim().to_string()).collect(),
-        endpoints: vec![
-            EndpointInfo {
-                path: "/help/health".to_string(),
-                method: "GET".to_string(),
-                description: "Vérification complète de l'état de santé du système".to_string(),
-            },
-            EndpointInfo {
-                path: "/help/health-light".to_string(),
-                method: "GET".to_string(),
-                description: "Vérification rapide (DB + performance seulement)".to_string(),
-            },
-            EndpointInfo {
-                path: "/help/info".to_string(),
-                method: "GET".to_string(),
-                description: "Informations sur l'API".to_string(),
-            },
-            EndpointInfo {
-                path: "/help/ping".to_string(),
-                method: "GET".to_string(),
-                description: "Test de connectivité simple".to_string(),
-            },
-        ],
-    })
-}
-
-/// Handler pour le ping simple
-pub async fn ping() -> &'static str {
-    "pong"
-}
-
-/// Handler pour la health légère (juste DB + performance)
+#[utoipa::path(
+    get,
+    path = "/api/help/health-light",
+    tag = "System",
+    responses(
+        (status = 200, description = "System is healthy", body = HealthResponse),
+        (status = 503, description = "System is unhealthy")
+    ),
+    summary = "Get light system health status",
+    description = "Performs a quick health check focusing only on database connection and basic performance metrics."
+)]
 pub async fn health_light(State(db): State<DatabaseManager>) -> Result<Json<HealthResponse>, StatusCode> {
     let start_time = Instant::now();
     
@@ -128,6 +113,61 @@ pub async fn health_light(State(db): State<DatabaseManager>) -> Result<Json<Heal
     } else {
         Err(StatusCode::SERVICE_UNAVAILABLE)
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/help/info",
+    tag = "System",
+    responses(
+        (status = 200, description = "API information retrieved successfully", body = InfoResponse)
+    ),
+    summary = "Get API information",
+    description = "Retrieves general information about the API including version, description, and available endpoints."
+)]
+pub async fn info() -> Json<InfoResponse> {
+    Json(InfoResponse {
+        name: env!("CARGO_PKG_NAME").to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        description: env!("CARGO_PKG_DESCRIPTION").to_string(),
+        authors: env!("CARGO_PKG_AUTHORS").split(':').map(|s| s.trim().to_string()).collect(),
+        endpoints: vec![
+            EndpointInfo {
+                path: "/help/health".to_string(),
+                method: "GET".to_string(),
+                description: "Vérification complète de l'état de santé du système".to_string(),
+            },
+            EndpointInfo {
+                path: "/help/health-light".to_string(),
+                method: "GET".to_string(),
+                description: "Vérification rapide (DB + performance seulement)".to_string(),
+            },
+            EndpointInfo {
+                path: "/help/info".to_string(),
+                method: "GET".to_string(),
+                description: "Informations sur l'API".to_string(),
+            },
+            EndpointInfo {
+                path: "/help/ping".to_string(),
+                method: "GET".to_string(),
+                description: "Test de connectivité simple".to_string(),
+            },
+        ],
+    })
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/help/ping",
+    tag = "System",
+    responses(
+        (status = 200, description = "API is reachable", body = String)
+    ),
+    summary = "Ping the API",
+    description = "Simple endpoint to check if the API is reachable. Returns 'pong' if successful."
+)]
+pub async fn ping() -> &'static str {
+    "pong"
 }
 
 /// Vérification de l'état de la base de données
@@ -204,3 +244,4 @@ fn get_system_metrics() -> SystemMetrics {
         uptime: System::uptime(),
     }
 } 
+

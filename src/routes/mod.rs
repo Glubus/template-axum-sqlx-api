@@ -14,30 +14,23 @@
 
 use crate::db::DatabaseManager;
 use axum::Router;
+use utoipa_swagger_ui::SwaggerUi;
+use utoipa::OpenApi;
 
 // Re-export all route modules here
 pub mod help;
 
-/// Crée le routeur principal de l'application.
-///
-/// Cette fonction :
-/// 1. Crée un nouveau routeur
-/// 2. Combine toutes les routes des différents modules
-/// 3. Ajoute l'état de la base de données
-///
-/// # Arguments
-///
-/// * `db` - Le gestionnaire de base de données
-///
-/// # Returns
-///
-/// * `Router` - Le routeur configuré
+#[derive(OpenApi)]
+#[openapi(paths(crate::handlers::help::health_check, crate::handlers::help::health_light, crate::handlers::help::info, crate::handlers::help::ping))]
+struct ApiDoc;
+
 pub fn create_router(db: DatabaseManager) -> Router {
     Router::new()
-        .merge(help::router())
+        .nest("/api", help::router())
+        .merge(SwaggerUi::new("/api/swagger").url("/api-doc/openapi.json", ApiDoc::openapi()))
         // Add your other route modules here
         // Example:
-        // .merge(user::router())
-        // .merge(product::router())
+        // .nest("/api", user::router())
+        // .nest("/api", product::router())
         .with_state(db)
 }

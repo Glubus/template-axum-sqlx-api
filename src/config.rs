@@ -1,19 +1,8 @@
-//! # Configuration Module
-//!
-//! Ce module gère la configuration de l'application.
-//! Il charge la configuration depuis config.toml et permet des overrides via les variables d'environnement.
-//!
-//! ## Utilisation
-//! ```rust
-//! use crate::config::Config;
-//!
-//! let config = Config::load()?;
-//! println!("Server address: {}", config.server_address());
-//! ```
-
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::Path;
+use tracing::{info, warn, debug, Level};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
@@ -50,33 +39,54 @@ pub struct Config {
 }
 
 impl Config {
+    /// Initialise le système de logging
+    fn init_logging(level: &str, format: &str) {
+        let env_filter = EnvFilter::try_from_default_env()
+            .or_else(|_| EnvFilter::try_new(level))
+            .unwrap_or_else(|_| EnvFilter::new("info"));
+
+        tracing_subscriber::registry()
+            .with(env_filter)
+            .with(tracing_subscriber::fmt::layer())
+            .init();
+
+        info!("Logging initialized with level: {}", level);
+    }
+
     /// Charge la configuration depuis config.toml avec possibilité d'override par les variables d'environnement
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
-        let config_path = "config.toml";
+        // Charger la configuration de base pour initialiser le logging
+        let config_content = include_str!("../assets/config.toml");
+        let base_config = toml::from_str::<Config>(config_content)?;
+        
+        // Initialiser le logging avec la configuration de base
+        Self::init_logging(&base_config.logging.level, &base_config.logging.format);
+
+        info!("Loading configuration from config.toml");
         
         // Charger le fichier TOML
-        let mut config = if Path::new(config_path).exists() {
-            let content = std::fs::read_to_string(config_path)?;
-            toml::from_str::<Config>(&content)?
-        } else {
-            // Configuration par défaut si le fichier n'existe pas
-            Config::default()
-        };
+        let mut config = base_config;
+        debug!("Base configuration loaded: {:?}", config);
 
         // Override avec les variables d'environnement si elles existent
         if let Ok(host) = env::var("HOST") {
+            info!("Overriding host with environment variable: {}", host);
             config.server.host = host;
         }
         if let Ok(port) = env::var("PORT") {
+            info!("Overriding port with environment variable: {}", port);
             config.server.port = port.parse().unwrap_or(config.server.port);
         }
         if let Ok(db_url) = env::var("DATABASE_URL") {
+            info!("Overriding database URL with environment variable");
             config.database.url = db_url;
         }
         if let Ok(log_level) = env::var("RUST_LOG") {
+            info!("Overriding log level with environment variable: {}", log_level);
             config.logging.level = log_level;
         }
 
+        info!("Configuration loaded successfully. Server will bind to: {}", config.server_address());
         Ok(config)
     }
 
@@ -87,6 +97,7 @@ impl Config {
 
     /// Configuration par défaut
     pub fn default() -> Self {
+        warn!("Using default configuration as no config.toml was found");
         Config {
             server: ServerConfig {
                 host: "127.0.0.1".to_string(),

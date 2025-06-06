@@ -52,12 +52,13 @@ toml = "0.8"
 sysinfo = "0.35"
 
 # OpenAPI / Swagger
-# utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
-# utoipa-swagger-ui = { version = "9.0.1", features = ["axum"] }
+utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 
 # Additional dependencies
 async-trait = "0.1"
 futures = "0.3"
+include_dir = "0.7.4"
 
 [dev-dependencies]
 tokio-test = "0.4"
