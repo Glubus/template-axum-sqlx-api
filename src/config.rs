@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::env;
-use tracing::{info, warn, debug};
+use tracing::{info, warn};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -39,7 +38,7 @@ pub struct Config {
 
 impl Config {
     /// Initialise le système de logging
-    fn init_logging(level: &str, format: &str) {
+    fn init_logging(level: &str, _format: &str) {
         let env_filter = EnvFilter::try_from_default_env()
             .or_else(|_| EnvFilter::try_new(level))
             .unwrap_or_else(|_| EnvFilter::new("info"));
@@ -52,38 +51,14 @@ impl Config {
         info!("Logging initialized with level: {}", level);
     }
 
-    /// Charge la configuration depuis config.toml avec possibilité d'override par les variables d'environnement
+    /// Charge la configuration depuis config.toml
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
-        // Charger la configuration de base pour initialiser le logging
+        // Charger la configuration depuis le fichier TOML
         let config_content = include_str!("../assets/config.toml");
-        let base_config = toml::from_str::<Config>(config_content)?;
+        let config = toml::from_str::<Config>(config_content)?;
         
-        // Initialiser le logging avec la configuration de base
-        Self::init_logging(&base_config.logging.level, &base_config.logging.format);
-
-        info!("Loading configuration from config.toml");
-        
-        // Charger le fichier TOML
-        let mut config = base_config;
-        debug!("Base configuration loaded: {:?}", config);
-
-        // Override avec les variables d'environnement si elles existent
-        if let Ok(host) = env::var("HOST") {
-            info!("Overriding host with environment variable: {}", host);
-            config.server.host = host;
-        }
-        if let Ok(port) = env::var("PORT") {
-            info!("Overriding port with environment variable: {}", port);
-            config.server.port = port.parse().unwrap_or(config.server.port);
-        }
-        if let Ok(db_url) = env::var("DATABASE_URL") {
-            info!("Overriding database URL with environment variable");
-            config.database.url = db_url;
-        }
-        if let Ok(log_level) = env::var("RUST_LOG") {
-            info!("Overriding log level with environment variable: {}", log_level);
-            config.logging.level = log_level;
-        }
+        // Initialiser le logging avec la configuration
+        Self::init_logging(&config.logging.level, &config.logging.format);
 
         info!("Configuration loaded successfully. Server will bind to: {}", config.server_address());
         Ok(config)
@@ -93,9 +68,10 @@ impl Config {
     pub fn server_address(&self) -> String {
         format!("{}:{}", self.server.host, self.server.port)
     }
+}
 
-    /// Configuration par défaut
-    pub fn default() -> Self {
+impl Default for Config {
+    fn default() -> Self {
         warn!("Using default configuration as no config.toml was found");
         Config {
             server: ServerConfig {
