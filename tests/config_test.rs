@@ -1,6 +1,4 @@
 use template_axum_sqlx_api::config::Config;
-use std::io::Write;
-use tempfile::NamedTempFile;
 
 #[test]
 fn test_config_default() {

@@ -26,6 +26,12 @@ pub struct DatabaseManager {
     pool: Option<PgPool>,
 }
 
+impl Default for DatabaseManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DatabaseManager {
     /// Crée une nouvelle instance de DatabaseManager.
     ///

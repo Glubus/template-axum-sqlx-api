@@ -12,8 +12,6 @@ use axum::{
 use chrono::Utc;
 use sysinfo::{Disks, System};
 use std::time::Instant;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     db::DatabaseManager,

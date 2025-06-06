@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::Path;
-use tracing::{info, warn, debug, Level};
+use tracing::{info, warn, debug};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
