@@ -40,3 +40,6 @@ htmlcov/
 *.tmp
 *.temp
 .cache/
+
+# Scripts
+push-all.sh
