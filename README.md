@@ -1,143 +1,101 @@
 # Template Axum SQLx API
 
-Un template pour construire des APIs REST avec Axum et SQLx.
+Ce projet est un template pour une API REST construite avec Rust, Axum et SQLx. Il inclut une configuration de base pour le logging, la gestion des erreurs, et l'intégration avec une base de données PostgreSQL.
 
 ## Fonctionnalités
 
-- 🚀 Framework web Axum
-- 🗄️ Base de données PostgreSQL avec SQLx
-- 🔒 Validation des données
-- 📝 Logging structuré
-- 🔄 Gestion des erreurs
-- 🌐 CORS configurable
-- 📦 Configuration via fichier TOML
-- 📊 Endpoints de diagnostic et monitoring
-- 🔍 Validation des données avec validator
+- 🚀 API REST avec Axum
+- 🗄️ Intégration avec PostgreSQL via SQLx
+- 📝 Logging structuré avec tracing
+- 🔄 Gestion des erreurs avec thiserror
+- 📚 Documentation OpenAPI
+- 🧪 Tests d'intégration avec une base de données de test
 
 ## Prérequis
 
 - Rust (dernière version stable)
+- Cargo (>= 1.75.0)
+- Git (>= 2.42.0)
 - PostgreSQL
-- Docker (optionnel)
 
 ## Installation
 
-1. Clonez le repository :
+1. Cloner le repository :
 ```bash
-git clone http://localhost:3000/osef/template-axum-sqlx-api.git
+git clone {link}
 cd template-axum-sqlx-api
 ```
 
-2. Créez un fichier `config.toml` à la racine du projet :
-```toml
-[server]
-host = "127.0.0.1"
-port = 3000
+2. Configurer la base de données :
+   - Créer une base de données PostgreSQL
+   - Copier `config.toml.example` vers `config.toml`
+   - Modifier les paramètres de connexion dans `config.toml`
 
-[database]
-url = "postgres://postgres:postgres@localhost:5432/template_db"
+## Développement
 
-[logging]
-level = "info"
-```
+### Base de données de développement
 
-3. Créez la base de données :
+Un fichier `compose.yml` est fourni dans le dossier `assets/` pour lancer rapidement une base de données PostgreSQL de développement :
+
 ```bash
-sqlx database create
+cd assets
+docker compose up -d
 ```
 
-4. Exécutez les migrations (à implémenter) :
-```bash
-sqlx migrate run
-```
+La base de données sera accessible sur `localhost:5432` avec les identifiants par défaut :
+- Utilisateur : `postgres`
+- Mot de passe : `postgres`
+- Base de données : `template_db`
 
-## Démarrage
+### Lancer l'application
 
 ```bash
 cargo run
 ```
 
-Le serveur sera accessible à l'adresse `http://localhost:3000`.
-
-## Endpoints d'Aide et Diagnostic
-
-L'API fournit plusieurs endpoints pour le monitoring et le diagnostic :
-
-- `GET /help/health` : Vérification complète de l'état de santé du système
-  - État de la base de données
-  - Métriques système (CPU, mémoire, disque)
-  - Temps de réponse
-- `GET /help/health-light` : Vérification rapide (DB + performance)
-- `GET /help/info` : Informations sur l'API
-- `GET /help/ping` : Test de connectivité simple
-
-## Structure du Projet
-
-```
-.
-├── src/
-│   ├── config.rs     # Configuration de l'application
-│   ├── db.rs         # Gestion de la base de données
-│   ├── handlers/     # Gestionnaires de routes
-│   │   ├── common.rs # Handlers communs
-│   │   └── help.rs   # Handlers d'aide et diagnostic
-│   ├── models/       # Modèles de données
-│   │   ├── common.rs # Modèles communs
-│   │   └── help.rs   # Modèles d'aide et diagnostic
-│   ├── routes/       # Définition des routes
-│   │   ├── common.rs # Routes communes
-│   │   └── help.rs   # Routes d'aide et diagnostic
-│   └── main.rs       # Point d'entrée
-├── config.toml       # Configuration de l'application
-├── .gitignore
-├── Cargo.toml
-└── README.md
-```
-
-## Configuration
-
-La configuration se fait via le fichier `config.toml` :
-
-```toml
-[server]
-host = "127.0.0.1"  # Adresse du serveur
-port = 3000         # Port du serveur
-
-[database]
-url = "postgres://postgres:postgres@localhost:5432/template_db"  # URL de connexion
-
-[logging]
-level = "info"      # Niveau de logging (debug, info, warn, error)
-```
-
-## Développement
+L'API sera disponible sur `http://localhost:3000`.
 
 ### Tests
+
+Pour les tests d'intégration, un fichier `compose.yml` est fourni pour lancer une base de données PostgreSQL de test :
+
+```bash
+docker compose up -d
+```
+
+Puis lancer les tests :
 
 ```bash
 cargo test
 ```
 
-### Linting
+### Documentation
 
-```bash
-cargo clippy
+La documentation OpenAPI est disponible à `http://localhost:3000/api/swagger`.
+
+## Structure du projet
+
+```
+.
+├── src/
+│   ├── config.rs      # Configuration de l'application
+│   ├── error.rs       # Gestion des erreurs
+│   ├── handlers/      # Gestionnaires de routes
+│   ├── models/        # Modèles de données
+│   └── main.rs        # Point d'entrée
+├── tests/             # Tests d'intégration
+├── assets/           # Ressources (compose.yml, etc.)
+├── config.toml        # Configuration
+└── Cargo.toml         # Dépendances
 ```
 
-### Formatage
+## Contribution
 
-```bash
-cargo fmt
-```
-
-## Docker
-
-Pour construire et exécuter avec Docker :
-
-```bash
-docker build -t template-axum-sqlx-api .
-docker run -p 3000:3000 template-axum-sqlx-api
-```
+1. Fork le projet
+2. Créer une branche pour votre fonctionnalité
+3. Commiter vos changements
+4. Pousser vers la branche
+5. Ouvrir une Pull Request
 
 ## Licence
 
