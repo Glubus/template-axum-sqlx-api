@@ -52,9 +52,9 @@ impl Config {
     }
 
     /// Charge la configuration depuis config.toml
-    pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         // Charger la configuration depuis le fichier TOML
-        let config_content = include_str!("../assets/config.toml");
+        let config_content = path;
         let config = toml::from_str::<Config>(config_content)?;
         
         // Initialiser le logging avec la configuration

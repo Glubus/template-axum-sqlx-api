@@ -3,14 +3,6 @@
 //! Ce module gère la connexion et les opérations avec la base de données PostgreSQL.
 //! Il utilise SQLx pour les requêtes asynchrones et la gestion du pool de connexions.
 //!
-//! ## Utilisation
-//! ```rust
-//! use crate::db::DatabaseManager;
-//!
-//! let mut db = DatabaseManager::new();
-//! db.connect().await?;
-//! let pool = db.get_pool();
-//! ```
 
 use crate::config::Config;
 use sqlx::PgPool;

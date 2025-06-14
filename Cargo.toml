@@ -1,6 +1,6 @@
 [package]
 name = "template-axum-sqlx-api"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2024"
 authors = ["Osef <osefcode@gmail.com>"]
 description = "A template for building REST APIs with Axum and SQLx"
@@ -43,13 +43,13 @@ rust_decimal = { version = "1.32", features = ["serde"] }
 bigdecimal = { version = "0.4.0", features = ["serde"] }
 
 # Validation
-validator = { version = "0.16", features = ["derive"] }
+validator = { version = "0.20", features = ["derive"] }
 
 # Security
 argon2 = "0.5"
 
 # Configuration
-config = "0.14"
+config = "0.15.11"
 toml = "0.8"
 
 # System metrics
@@ -63,10 +63,11 @@ utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 async-trait = "0.1"
 futures = "0.3"
 include_dir = "0.7.4"
+fake = { version = "4", features = ["derive"] }
 
 [dev-dependencies]
 tokio-test = "0.4"
-tower = { version = "0.4", features = ["util"] }
+tower = { version = "0.5.2", features = ["util"] }
 hyper = { version = "1.0", features = ["full"] }
 serde_json = "1.0"
 tempfile = "3.8"

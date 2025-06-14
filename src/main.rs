@@ -15,12 +15,13 @@ mod db;
 mod handlers;
 mod models;
 mod routes;
+mod fixtures;
 
 use axum::Router;
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use tracing::info;
-
+use fixtures::run_fixtures;
 /// Point d'entrée principal de l'application.
 ///
 /// Cette fonction :
@@ -30,14 +31,18 @@ use tracing::info;
 /// 4. Démarre le serveur HTTP
 #[tokio::main]
 async fn main() {
+
     // Load configuration from config.toml
-    let config = config::Config::load().expect("Failed to load configuration");
+    let config = config::Config::load(include_str!("../assets/config.toml")).expect("Failed to load configuration");
 
     // Initialize database
     let mut db = db::DatabaseManager::new();
     db.connect(&config)
         .await
         .expect("Failed to connect to database");
+
+    // Run fixtures
+    run_fixtures(&db.get_pool()).await.expect("Failed to run fixtures");
 
     // Build our application with a route
     let app = Router::new()
