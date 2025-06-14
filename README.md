@@ -18,6 +18,7 @@ Ce projet est un template pour une API REST construite avec Rust, Axum et SQLx. 
 - Git (>= 2.42.0)
 - PostgreSQL
 - Sqlx Client (cargo install sqlx-cli)
+
 ## Installation
 
 1. Cloner le repository :

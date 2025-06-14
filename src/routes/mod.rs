@@ -21,7 +21,8 @@ use utoipa::OpenApi;
 pub mod help;
 
 #[derive(OpenApi)]
-#[openapi(paths(crate::handlers::help::health_check, crate::handlers::help::health_light, crate::handlers::help::info, crate::handlers::help::ping))]
+#[openapi(paths(crate::handlers::help::health_check, crate::handlers::help::health_light,
+                crate::handlers::help::info, crate::handlers::help::ping))]
 struct ApiDoc;
 
 pub fn create_router(db: DatabaseManager) -> Router {
