@@ -2667,7 +2667,7 @@ dependencies = [
 
 [[package]]
 name = "template-axum-sqlx-api"
-version = "0.5.0"
+version = "0.5.2"
 dependencies = [
  "anyhow",
  "argon2",
@@ -2680,6 +2680,7 @@ dependencies = [
  "futures",
  "hyper",
  "include_dir",
+ "once_cell",
  "rust_decimal",
  "serde",
  "serde_json",

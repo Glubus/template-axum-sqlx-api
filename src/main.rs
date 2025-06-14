@@ -42,7 +42,7 @@ async fn main() {
         .expect("Failed to connect to database");
 
     // Run fixtures
-    run_fixtures(&db.get_pool(), true).await.expect("Failed to run fixtures");
+    run_fixtures(db.get_pool(), true).await.expect("Failed to run fixtures");
 
     // Build our application with a route
     let app = Router::new()

@@ -34,31 +34,6 @@ impl FixtureManager {
         Ok(())
     }
 
-    /// Template pour créer et soumettre des fixtures
-    /// 
-    /// # Arguments
-    /// 
-    /// * `fixture_data` - Les données à insérer dans la base de données
-    /// * `table_name` - Le nom de la table où insérer les données
-    /// 
-    /// # Exemple
-    /// 
-    /// ```rust
-    /// let fixture_manager = FixtureManager::new(pool);
-    /// 
-    /// let user_data = vec![
-    ///     json!({
-    ///         "name": "John Doe",
-    ///         "email": "john@example.com"
-    ///     }),
-    ///     json!({
-    ///         "name": "Jane Doe",
-    ///         "email": "jane@example.com"
-    ///     })
-    /// ];
-    /// 
-    /// fixture_manager.submit_fixtures(user_data, "users").await?;
-    /// ```
     pub async fn submit_fixtures<T: serde::Serialize>(
         &self,
         fixture_data: Vec<T>,
@@ -77,7 +52,7 @@ impl FixtureManager {
             // Convertit les données en JSON
             let json_data = match serde_json::to_value(data) {
                 Ok(value) => value,
-                Err(e) => return Err(sqlx::Error::Protocol(format!("JSON serialization error: {}", e).into())),
+                Err(e) => return Err(sqlx::Error::Protocol(format!("JSON serialization error: {}", e))),
             };
             
             // Construit la requête d'insertion dynamiquement
@@ -118,7 +93,7 @@ impl FixtureManager {
                         } else if let Some(f) = n.as_f64() {
                             query_builder = query_builder.bind(f);
                         } else {
-                            return Err(sqlx::Error::Protocol(format!("Unsupported number type for column {}", col).into()));
+                            return Err(sqlx::Error::Protocol(format!("Unsupported number type for column {}", col)));
                         }
                     },
                     serde_json::Value::String(s) => {
@@ -128,7 +103,7 @@ impl FixtureManager {
                         // Pour les tableaux et objets, on les sérialise en JSON
                         let json_string = match serde_json::to_string(value) {
                             Ok(s) => s,
-                            Err(e) => return Err(sqlx::Error::Protocol(format!("JSON serialization error: {}", e).into())),
+                            Err(e) => return Err(sqlx::Error::Protocol(format!("JSON serialization error: {}", e))),
                         };
                         query_builder = query_builder.bind(json_string);
                     }

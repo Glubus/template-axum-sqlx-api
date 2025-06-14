@@ -3,7 +3,7 @@ use crate::fixtures::common::FixtureManager;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use fake::{Dummy as FakeDummy, Fake, Faker};
-use tracing::{info, warn};
+use tracing::info;
 
 
 // this is just a dummy model you can delete it 
