@@ -3,6 +3,8 @@ use crate::fixtures::common::FixtureManager;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use fake::{Dummy as FakeDummy, Fake, Faker};
+use tracing::{info, warn};
+
 
 // this is just a dummy model you can delete it 
 // this is just a dummy model you can delete it 
@@ -25,10 +27,17 @@ pub fn create_dummy_from_fake(number: u32) -> Vec<Dummy> {
     dummies
 }
 
-pub async fn create_dummy(pool: &Pool<Postgres>, name: String) -> Result<(), sqlx::Error> {
+pub async fn create_dummy(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    info!("Creating dummy...");
     let dummies = create_dummy_from_fake(100);
     let fixture_manager = FixtureManager::new(pool.clone());
     fixture_manager.submit_fixtures(dummies, "dummy").await?;
     Ok(())
 }
 
+pub async fn clean_dummy(pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    info!("Cleaning dummy...");
+    let fixture_manager = FixtureManager::new(pool.clone());
+    fixture_manager.cleanup_fixtures("dummy").await?;
+    Ok(())
+}
