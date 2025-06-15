@@ -1,6 +1,6 @@
 [package]
 name = "template-axum-sqlx-api"
-version = "0.5.2"
+version = "0.6.2"
 edition = "2024"
 authors = ["Osef <osefcode@gmail.com>"]
 description = "A template for building REST APIs with Axum and SQLx"
@@ -22,7 +22,7 @@ tower = "0.5"
 tower-http = { version = "0.6", features = ["cors", "trace"] }
 
 # Database
-sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls", "postgres", "chrono", "json", "bigdecimal"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "chrono", "json", "bigdecimal", "macros"] }
 
 # Serialization
 serde = { version = "1.0.197", features = ["derive"] }
@@ -63,7 +63,7 @@ utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 async-trait = "0.1"
 futures = "0.3"
 include_dir = "0.7.4"
-fake = { version = "4", features = ["derive"] }
+fake = { version = "4", features = ["derive", "bigdecimal", "chrono"] }
 once_cell = "1.21.3"
 
 [dev-dependencies]

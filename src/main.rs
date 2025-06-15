@@ -16,12 +16,15 @@ mod handlers;
 mod models;
 mod routes;
 mod fixtures;
+mod middleware;
 
 use axum::Router;
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use tracing::info;
 use fixtures::run_fixtures;
+use crate::middleware::logging::setup_middleware;
+
 /// Point d'entrée principal de l'application.
 ///
 /// Cette fonction :
@@ -48,6 +51,8 @@ async fn main() {
     let app = Router::new()
         .merge(routes::create_router(db))
         .layer(CorsLayer::permissive());
+
+    let app = setup_middleware(app);
 
     // Run it
     let addr: SocketAddr = config
