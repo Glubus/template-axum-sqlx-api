@@ -191,22 +191,30 @@ async fn check_database_health(db: &DatabaseManager) -> DatabaseStatus {
 
 /// Collecte des métriques système (optimisée)
 fn get_system_metrics() -> SystemMetrics {
+    // Utiliser new() d'abord pour les CPU
     let mut sys = System::new();
     
-    // Refresh seulement la mémoire et CPU (plus rapide)
+    // Premier refresh pour initialiser
     sys.refresh_cpu_usage();
-    sys.refresh_memory();
     
-    // CPU usage (moyenne de tous les cœurs)
+    // Attendre l'intervalle minimum requis pour les CPU
+    std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
+    
+    // Deuxième refresh pour obtenir les vraies données CPU
+    sys.refresh_cpu_usage();
+    sys.refresh_memory(); // Refresh mémoire aussi
+    
+    // CPU usage avec la méthode recommandée
     let cpu_usage = if !sys.cpus().is_empty() {
-        sys.cpus().iter()
+        let total: f32 = sys.cpus().iter()
             .map(|cpu| cpu.cpu_usage())
-            .sum::<f32>() / sys.cpus().len() as f32
+            .sum();
+        total / sys.cpus().len() as f32
     } else {
         0.0
     };
     
-    let cpu_count = sys.cpus().len();
+    let cpu_count = sys.cpus().len().max(1);
     
     // Mémoire
     let memory_used = sys.used_memory() / 1024 / 1024; // Convert to MB
@@ -217,7 +225,7 @@ fn get_system_metrics() -> SystemMetrics {
         0.0
     };
     
-    // Disques - seulement pour le premier disque (plus rapide)
+    // Disques
     let disks = Disks::new_with_refreshed_list();
     let disk_usage_percent = if let Some(disk) = disks.first() {
         let total = disk.total_space();
@@ -231,6 +239,14 @@ fn get_system_metrics() -> SystemMetrics {
     } else {
         0.0
     };
+    
+    // Log pour debug (temporaire)
+    println!("Debug CPU: individual_cores=[{}], average={:.1}%", 
+             sys.cpus().iter()
+                .map(|cpu| format!("{:.1}", cpu.cpu_usage()))
+                .collect::<Vec<_>>()
+                .join(", "),
+             cpu_usage);
     
     SystemMetrics {
         cpu_usage,

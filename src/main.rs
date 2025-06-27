@@ -24,6 +24,7 @@ use tower_http::cors::CorsLayer;
 use tracing::info;
 use fixtures::run_fixtures;
 use crate::middleware::logging::setup_middleware;
+use crate::models::status::start_background_metrics_task;
 
 /// Point d'entrée principal de l'application.
 ///
@@ -46,6 +47,10 @@ async fn main() {
 
     // Run fixtures
     run_fixtures(db.get_pool(), true).await.expect("Failed to run fixtures");
+
+    // Démarrer la tâche de calcul des métriques en arrière-plan
+    start_background_metrics_task(db.clone(), config.clone()).await;
+    info!("Background metrics task started (5-minute intervals)");
 
     // Build our application with a route
     let app = Router::new()

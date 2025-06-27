@@ -13,7 +13,7 @@
 //! 4. Utilisez `merge()` pour combiner les routes
 
 use crate::db::DatabaseManager;
-use axum::Router;
+use axum::{routing::get, Router};
 use utoipa_swagger_ui::SwaggerUi;
 use utoipa::OpenApi;
 
@@ -27,6 +27,9 @@ struct ApiDoc;
 
 pub fn create_router(db: DatabaseManager) -> Router {
     Router::new()
+        // Page de status principale à la racine
+        .route("/", get(crate::handlers::status::status_page))
+        // Routes API
         .nest("/api", help::router())
         .merge(SwaggerUi::new("/api/swagger").url("/api-doc/openapi.json", ApiDoc::openapi()))
         // Add your other route modules here
