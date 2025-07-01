@@ -136,7 +136,7 @@ async fn calculate_metrics_via_direct_system_calls(config: &Config) -> Result<Pe
     
     let ping_start = std::time::Instant::now();
     let ping_response = client
-        .get(&format!("{}/api/help/ping", base_url))
+        .get(format!("{}/api/help/ping", base_url))
         .timeout(Duration::from_secs(3))
         .send()
         .await;
@@ -274,7 +274,7 @@ async fn test_db_connectivity() -> (bool, Option<u64>) {
     
     let mut hasher = DefaultHasher::new();
     Utc::now().timestamp().hash(&mut hasher);
-    let db_time = (hasher.finish() % 50) as u64 + 5; // Entre 5ms et 55ms
+    let db_time = (hasher.finish() % 50) + 5; // Entre 5ms et 55ms
     
     (true, Some(db_time))
 }
